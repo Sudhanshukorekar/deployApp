@@ -24,18 +24,13 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      # Load your SSH private key from GitHub Secrets
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # Add your server to known_hosts to avoid prompts
-      - name: Add server to known_hosts
-        run: ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-
-      # Deploy using rsync
-      - name: Deploy via Rsync
+      # Setup SSH key from GitHub Secret
+      - name: Setup SSH
         run: |
-          rsync -avz --delete \
-            ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/deployApp/
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      # Verify SSH connection
+      - n
